@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codenames-rsa"
+version = "0.1.0"
+description = "Where does machine learning help pragmatic reasoning? An RSA-based study of Codenames (CS 4701)."
+requires-python = ">=3.10"
+authors = [
+    { name = "Tanya Paul" },
+    { name = "Melissa Velasquez" },
+    { name = "Carissa Zheng" },
+]
+dependencies = [
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+ml = [
+    "torch>=2.1",
+    "transformers>=4.40",
+]
+ui = [
+    "streamlit>=1.30",
+]
+dev = [
+    "pytest>=7.4",
+]
+
+[tool.setuptools.packages.find]
+include = ["codenames_rsa*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

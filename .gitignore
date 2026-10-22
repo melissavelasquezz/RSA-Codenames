@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.DS_Store
+
+# Large downloaded resources (see data/README.md)
+data/embeddings/*
+data/swow/*
+!data/embeddings/.gitkeep
+!data/swow/.gitkeep
+
+# Experiment output
+results/*
+!results/.gitkeep
