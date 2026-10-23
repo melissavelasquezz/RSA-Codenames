@@ -55,5 +55,5 @@ def test_turn_ends_on_wrong_card_and_game_terminates():
     result = play_game(ScriptedSpymaster(), OrderedGuesser(), board)
     assert result.won or result.hit_assassin or result.n_clues == 25
     for turn in result.turns:
-        assert len(turn.guesses) <= turn.clue.number + 1
+        assert len(turn.guesses) <= turn.clue.number
         assert all(g.card_type == CardType.TEAM for g in turn.guesses[:-1])
