@@ -40,8 +40,10 @@ def play_game(spymaster, guesser, board: Board, max_clues: int = 25) -> GameResu
     """Run the single-team variant until the board is cleared, the assassin is hit, or
     `max_clues` is reached.
 
-    Guessing follows the standard rules: up to `number + 1` guesses, and the turn ends
-    on the first non-team card or when the guesser passes (returns None).
+    Guessing mostly follows the standard Codenames rules: the guesser may make up to `number` 
+    guesses, and the turn ends either when a non-team card is selected or when the guesser 
+    passes by returning `None`. The main difference from the standard rules is that our 
+    implementation allows at most `number` guesses rather than `number + 1`, which we do for simplicity.
     """
     state = GameState(board)
     spymaster.reset(board)
@@ -54,7 +56,7 @@ def play_game(spymaster, guesser, board: Board, max_clues: int = 25) -> GameResu
         turn = TurnRecord(clue)
         state.turns.append(turn)
 
-        for _ in range(clue.number + 1):
+        for _ in range(clue.number):
             index = guesser.next_guess(state.guesser_view(), clue, turn.guesses)
             if index is None:
                 break
