@@ -12,9 +12,12 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+import numpy as np
+
 from .agents import (Guesser, LiteralGuesser, LMGuesser, LMSpymaster, PragmaticGuesser,
                      RSASpymaster, SimilaritySpymaster, Spymaster)
-from .meaning import AssociationModel, EmbeddingModel, MeaningModel, load_swow_strengths
+from .meaning import (AssociationModel, EmbeddingModel, MeaningModel, load_swow_strengths,
+                      train_swow_embeddings)
 from .rsa import LMCandidates, NeighborCandidates, RSAConfig
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -47,9 +50,11 @@ LISTENER_CONDITIONS: dict[str, Condition] = {
 class MeaningRegistry:
     """Lazily loads and caches meaning models by key. Paths are documented in data/README.md."""
 
-    def __init__(self, data_dir: Path = DATA_DIR, glove_max_words: int = 100_000):
+    def __init__(self, data_dir: Path = DATA_DIR, glove_max_words: int = 100_000,
+                 swow_dim: int = 300):
         self.data_dir = Path(data_dir)
         self.glove_max_words = glove_max_words
+        self.swow_dim = swow_dim
         self._cache: dict[str, MeaningModel] = {}
 
     def register(self, key: str, model: MeaningModel) -> None:
@@ -69,10 +74,24 @@ class MeaningRegistry:
             return EmbeddingModel.from_text_file(
                 self.data_dir / "embeddings" / "numberbatch-en-19.08.txt.gz", name="numberbatch")
         if key == "swow":
-            # TODO: switch to train_swow_embeddings(...) once the learned model exists.
-            return AssociationModel(load_swow_strengths(
-                self.data_dir / "swow" / "strength.SWOW-EN.R123.csv"))
+            return self._load_swow_embeddings()
+        if key == "swow-assoc":  # raw association strength, kept for comparison
+            return AssociationModel(load_swow_strengths(self._swow_strength_path()))
         raise KeyError(f"Unknown meaning model {key!r}")
+
+    def _swow_strength_path(self) -> Path:
+        return self.data_dir / "swow" / "strength.SWOW-EN.R123.csv"
+
+    def _load_swow_embeddings(self) -> EmbeddingModel:
+        """Learned SWOW embeddings, trained once and cached next to the strength file."""
+        cache = self.data_dir / "swow" / f"swow-svd-{self.swow_dim}.npz"
+        if cache.exists():
+            saved = np.load(cache)
+            return EmbeddingModel(list(saved["words"]), saved["vectors"], name="swow")
+        model = train_swow_embeddings(
+            load_swow_strengths(self._swow_strength_path()), dim=self.swow_dim, name="swow")
+        np.savez_compressed(cache, words=np.array(model.words), vectors=model.vectors)
+        return model
 
 
 def with_meaning(cond: Condition, meaning: str | None) -> Condition:

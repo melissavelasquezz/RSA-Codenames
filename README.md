@@ -72,7 +72,8 @@ streamlit run human_eval/app.py
 - [x] L0, S1 (expected turn value), L1, baseline agents, cross-play harness
 - [x] Exact-vs-approximate divergence on small boards
 - [ ] Codenames wordlist in `data/wordlists/codenames.txt`
-- [ ] Learned SWOW embeddings (`meaning/swow.py:train_swow_embeddings`); currently raw association strength
+- [x] Learned SWOW embeddings (PPMI + SVD, `meaning/swow.py:train_swow_embeddings`), used by
+      conditions `a` / `a+b`; raw association strength is still available as `swow-assoc`
 - [ ] LM candidate generation (`rsa/candidates.py:LMCandidates`) and LM agents (`agents/llm_agents.py`)
 - [ ] Speed: vectorize `expected_turn_values` across candidate clues (L1 is the bottleneck)
 - [ ] Tune α/β per meaning model (similarity scales differ: cosine vs association strength)

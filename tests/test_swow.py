@@ -50,3 +50,24 @@ def test_dim_is_capped_and_deterministic():
     b = train_swow_embeddings(STRENGTHS, dim=300)
     assert a.vectors.shape[1] == len(STRENGTHS) - 1
     np.testing.assert_allclose(a.vectors, b.vectors)
+
+
+def test_registry_trains_then_caches_swow(tmp_path):
+    from codenames_rsa.conditions import MeaningRegistry
+
+    swow_dir = tmp_path / "swow"
+    swow_dir.mkdir()
+    lines = ["cue\tresponse\tR123.Strength"]
+    lines += [f"{c}\t{r}\t{s}" for c, rs in STRENGTHS.items() for r, s in rs.items()]
+    (swow_dir / "strength.SWOW-EN.R123.csv").write_text("\n".join(lines), encoding="utf8")
+
+    first = MeaningRegistry(tmp_path, swow_dim=4).get("swow")
+    assert isinstance(first, EmbeddingModel)
+    assert (swow_dir / "swow-svd-4.npz").exists()
+
+    second = MeaningRegistry(tmp_path, swow_dim=4).get("swow")  # loads from the cache
+    assert second.words == first.words
+    np.testing.assert_allclose(second.vectors, first.vectors, atol=1e-6)
+
+    assoc = MeaningRegistry(tmp_path).get("swow-assoc")
+    assert not isinstance(assoc, EmbeddingModel)
