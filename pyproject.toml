@@ -21,6 +21,7 @@ dependencies = [
 ml = [
     "torch>=2.1",
     "transformers>=4.40",
+    "accelerate>=0.30",
 ]
 ui = [
     "streamlit>=1.30",

@@ -21,7 +21,8 @@ from .meaning import (AssociationModel, EmbeddingModel, MeaningModel, load_swow_
 from .rsa import LMCandidates, NeighborCandidates, RSAConfig
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-DEFAULT_LM = "TODO/choose-an-open-source-model"
+# Small enough to run on a laptop CPU; override with any HF instruction-tuned chat model.
+DEFAULT_LM = "Qwen/Qwen2.5-1.5B-Instruct"
 
 
 @dataclass(frozen=True)
